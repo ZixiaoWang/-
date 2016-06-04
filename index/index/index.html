@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href='https://fonts.googleapis.com/css?family=Comfortaa' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+        <style>
+            html, body{
+                margin: 0px;
+                background-color: #CCC;
+                font-family: 'Comfortaa', cursive;
+                font-weight: 300;
+            }
+            .canvas{
+                width: 100vw; height: 100vh;
+                background-color: white;
+                overflow: hidden;
+                
+                display: flex;
+                align-items: center;
+            }
+            .container{
+                width: 1200px;
+                margin: auto;
+                background-color: silver;
+            }
+            
+            .brick{
+                width: 133.33px; height: 133.33px;
+                box-sizing: border-box;
+                background-color: white;
+                float: left;
+                cursor: pointer;
+                font-size: 48px;
+                transform-style: preserve-3d;
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+                
+                transition: transform 1s ease-out;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: contain;
+            }
+            .brick>.full{
+                width: 100%; height: 100%;
+                display: block;
+            }
+            .full.topleft{ text-align: left; }
+            .full.topcenter{ text-align: center; }
+            .full.topright{ text-align: right; }
+            .full.middleleft{ text-align: left; line-height: 133px; }
+            .full.middlecenter{ text-align: center; line-height: 133px;  }
+            .full.middleright{ text-align: right; line-height: 133px;  }
+            .full.bottomleft{ text-align: left; line-height: 197px;  }
+            .full.bottomcenter{ text-align: center; line-height: 197px;  }
+            .full.bottomright{ text-align: right;  line-height: 197px; }
+            
+            .turndark{ animation: darkturn .2s ease-out forwards; }
+            @keyframes darkturn{
+                0% { opacity: 1; }
+                50% { opacity: 0.35; }
+                100% { opacity: 1; }
+            }
+            
+            
+            @keyframes floatout{
+                0%{ border-width:.0px solid white;}
+                45% {border:.5px solid #AAA;}
+                100% {border:0px solid white;}
+            }
+            .shakeX{ animation:xshake 1s ease-in-out forwards;}
+            @keyframes xshake{
+                0% { transform: rotateX(45deg); }
+                10% { transform: rotateX(-35deg); }
+                30% { transform: rotateX(24deg); }
+                60% { transform: rotateX(-10deg); }
+                100% { transform: rotateX(0deg); }
+            }
+            .shakeY{ animation:yshake 1s ease-in-out forwards;}
+            @keyframes yshake{
+                0% { transform: rotateY(45deg); }
+                10% { transform: rotateY(-35deg); }
+                30% { transform: rotateY(24deg); }
+                60% { transform: rotateY(-10deg); }
+                100% { transform: rotateY(0deg); }
+            }
+            
+            /* y 轴旋转 */
+            .rotateY90{ animation: yRotate90 .1s ease-out forwards;}
+            @keyframes yRotate90{
+                from { transform: rotateY(0deg);    }
+                to {transform: rotateY(90deg);  }
+            }
+            .rotateY180{ animation: yRotate180 .5s ease-out .1s forwards;}
+            @keyframes yRotate180{
+                0% { transform: rotateY(90deg);    }
+                20% {transform: rotateY(-25deg);  }
+                40% { transform: rotateY(20deg); }
+                60% { transform: rotateY(-8deg); }
+                80% { transform: rotateY(4deg); }
+                100% { transform: rotateY(0deg); }
+            }
+            /* x 轴旋转 */
+            .rotateX90{ animation: xRotate90 .1s ease-out forwards;}
+            @keyframes xRotate90{
+                from { transform: rotateX(0deg);    }
+                to {transform: rotateX(90deg);  }
+            }
+            .rotateX180{ animation: xRotate180 .5s ease-out forwards;}
+            @keyframes xRotate180{
+                0% { transform: rotateX(90deg);    }
+                20% {transform: rotateX(-25deg);  }
+                40% { transform: rotateX(20deg); }
+                60% { transform: rotateX(-8deg); }
+                80% { transform: rotateX(4deg); }
+                100% { transform: rotateX(0deg); }
+            }
+            /* 180 度后转 */
+            .turnback{ animation: reset .2s ease-out forwards;}
+            @keyframes reset{
+                0% { transform: scale(1);    }
+                50% { transform: scale(0.9);    }
+                100% {transform: scale(1);  }
+            }
+            
+            .vertical-move{ animation: updown 1.5s ease-out infinite; }
+            @keyframes updown{
+                from { line-height: 64px; color: #333; }
+                to { line-height: 197px; color: #EEE; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="canvas">
+            <div class="container" id="container">
+            </div>
+        </div>
+    </body>
+    <script src="./core.js"></script>
+    <script> 
+        window.addEventListener('popstate', function(event){
+            console.log(event.state.id);
+            switch (event.state.id){
+                case 0: greeting(0); break;
+                case 1: first(); break;
+                default: alert('no page');
+            }
+        });
+        (function(){
+            let position = location.href.substring(location.href.indexOf('#')+1);
+            console.log(position);
+            if(history.state == null) greeting(20);
+            else {
+                switch (position){
+                    case 'home': greeting(20); break;
+                    case 'intro': first(); break;
+                    default: greeting(20);
+                }
+            }
+        })();
+        
+        function first(){
+            window.history.pushState({'id':1}, null,'index.html#intro');
+            window.removeEventListener('wheel', first);
+            
+            $(5,5).removeEventListener('click', first);
+            $.resetAll(function(){
+                $.area(1,1,3,5).forEach(function(item, key){
+                    setTimeout(function(){
+                        item.showColor('lightblue');
+                    }, key*30)
+                });
+                $.area(7,1,9,5).forEach(function(item, key){
+                    setTimeout(function(){
+                        item.showColor('pink');
+                    }, key*30)
+                });
+                $.area(4,1,6,5).forEach(function(item, key){
+                    setTimeout(function(){
+                        item.showColor('lightgreen');
+                    }, key*30)
+                });
+            })
+        }
+        
+        function greeting(time){
+            window.history.pushState({'id':0}, null,'index.html#home');
+            window.addEventListener('wheel', first);
+            
+            $.resetAll();
+            var style = Math.random();
+            if (style > 0.8){  // L 7
+                $.area(1,2,1,4).add(29,29).forEach(item => item.showColor('lightblue', 300));
+                $.area(9,1,9,3).add(8,8).forEach(item => item.showColor('pink', 300));
+            } else if (style > 0.6){  // []
+                $.area(1,1,1,4).forEach(item => item.showColor('lightblue', 300));
+                $.area(9,1,9,4).forEach(item => item.showColor('pink', 300));
+            } else if (style > 0.4){  // |--|
+                $.area(1,1,3,1).add(11,11).forEach(item => item.showColor('lightblue', 300));
+                $.area(7,4,9,4).add(26,26).forEach(item => item.showColor('pink', 300));
+            } else if (style > 0.2){ //z z
+                $.area(2,1,3,1).add(10,11).forEach(item => item.showColor('lightblue', 300));
+                $.area(8,3,9,3).add(34,35).forEach(item => item.showColor('pink', 300));
+            } else {
+                $.area(1,1,2,2).forEach(item => item.showColor('lightblue', 300));
+                $.area(8,3,9,4).forEach(item => item.showColor('pink', 300));
+            }
+            
+            $(3,2).showImage('url(face1.png)', time);
+            $(4,2).showImage('url(face2.png)', time);
+            $(3,3).showImage('url(face3.png)', time);
+            $(4,3).showImage('url(face4.png)', time);
+            $(5,2).show2LineText('I am', 'Jack', RIGHT_RIGHT, time+200, 'lightgreen');
+            $(6,2).showText('y &&', BOTTOM_LEFT ,time+200, 'lightgreen');
+            $(5,3).show2LineText('prog', 'life', RIGHT_MID, time+300, 'lightgreen');
+            $(6,3).show2LineText('ramm', 'lover', LEFT_LEFT, time+300, 'lightgreen');
+            $(7,3).showText('er &&', TOP_LEFT, time+300, 'lightgreen');
+            $(5,5).showHTML('<span class="full vertical-move ion-android-arrow-dropdown" style="text-align:center;"></span>', time*2);
+            $(5,5).on('click', first);
+        }
+    </script>
+</html>
